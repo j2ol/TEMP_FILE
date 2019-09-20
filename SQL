@@ -1,0 +1,4 @@
+ALTER TABLE `181_realestate`.`data_analysis` 
+ADD COLUMN `weighted_manual` int(11) NULL COMMENT '权重值-手动增加' AFTER `weighted`;
+ALTER TABLE `181_realestate`.`data_analysis` 
+MODIFY COLUMN `weighted` int(11) NULL DEFAULT 0.0 COMMENT '权重值' AFTER `view_manual`;
