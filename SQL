@@ -1,13 +1,37 @@
-ALTER TABLE `181_realestate`.`data_analysis` 
-ADD COLUMN `weighted_manual` int(11) NULL COMMENT '权重值-手动增加' AFTER `weighted`;
-ALTER TABLE `181_realestate`.`data_analysis` 
-MODIFY COLUMN `weighted` int(11) NULL DEFAULT 0.0 COMMENT '权重值' AFTER `view_manual`;
-CREATE TABLE `data_analysis_weighted_config` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `data_type` varchar(32) NOT NULL COMMENT '数据类型(SECOND_HOUSE-二手房)',
-  `view_proportion` int(5) DEFAULT '0' COMMENT '浏览量-比重',
-  `collect_proportion` int(11) DEFAULT '0' COMMENT '收藏量-比重',
-  `subscription_proportion` int(11) DEFAULT '0' COMMENT '房价订阅量-比重',
-  `share_proportion` int(11) DEFAULT '0' COMMENT '分享量-比重',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1064 DEFAULT CHARSET=utf8 COMMENT='数据分析';
+select 
+		report.id,
+		report.channel_id channelId,
+		report.invalid,
+		channel.name channelName,
+		report.report_time reportTime,
+		report.name,
+		report.phone,
+		report.unique_identification uniqueIdentification,
+		report.wechat,
+		report.area_context areaContext,
+		report.follow_up followUp,
+		report.follow_up_phone followUpPhone,
+		report.creator,
+		user.real_name creatorName,
+		report.sex,
+		report.modifier,
+		  CASE
+			  WHEN
+				  (report.`channel_id` IS NOT NULL AND (report.`channel_id` = 0 OR report.`channel_id` != ''))
+				  AND (report.`name` IS NOT NULL AND (report.`name` = 0 OR report.`name` != ''))
+				  AND (report.`unique_identification` IS NOT NULL AND (report.`unique_identification` = 0 OR report.`unique_identification` != ''))
+			  THEN 'PERFECTED'
+			  ELSE 'NOT_PERFECT'
+		  END AS declarationStatus
+    from report,channel,user,report_process
+	where
+		report.channel_id=channel.id
+		and channel.follow_user_id=user.id
+		and report.id = report_process.report_id
+    
+    and report.is_delete=0 
+		and channel.is_delete=0
+		and user.is_delete=0
+		AND report_process.is_delete=0
+	  	GROUP BY report.id 
+		ORDER BY report.create_time DESC
